@@ -4,7 +4,11 @@
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/DevilStyle/DocConverter)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/DroneTechTI/DocConverter)
+[![Release](https://img.shields.io/github/v/release/DroneTechTI/DocConverter)](https://github.com/DroneTechTI/DocConverter/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/DroneTechTI/DocConverter/total)](https://github.com/DroneTechTI/DocConverter/releases)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/DroneTechTI/DocConverter/actions)
+[![Code Style](https://img.shields.io/badge/code%20style-PEP8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
 
 A powerful, cross-platform desktop application for converting documents between multiple formats with a modern graphical interface. Pure Python implementation - no external dependencies required for most conversions!
 
@@ -71,11 +75,21 @@ The modular architecture allows easy addition of new converters. Simply extend `
 
 ## 📦 Installation
 
-### Quick Start (All Platforms)
+### 🚀 Quick Start (Recommended)
+
+**Download the standalone executable - No Python installation required!**
+
+👉 **[Download DocConverter.exe](https://github.com/DroneTechTI/DocConverter/releases/latest/download/DocConverter.exe)** (41.5 MB)
+
+Just download and run - it's that simple!
+
+---
+
+### 💻 Install from Source
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/DevilStyle/DocConverter.git
+   git clone https://github.com/DroneTechTI/DocConverter.git
    cd DocConverter
    ```
 
