@@ -1,8 +1,12 @@
 """
-Registry per gestire tutti i convertitori disponibili
+Converter Registry - Central registry for managing all available converters.
+
+This module provides a singleton registry that handles converter registration,
+discovery, and selection based on file types and output formats.
 """
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional, Type, Any
 from pathlib import Path
+import logging
 
 from .converter_base import ConverterBase
 from utils.logger import get_logger
@@ -10,61 +14,78 @@ from utils.logger import get_logger
 
 class ConverterRegistry:
     """
-    Registro centralizzato di tutti i convertitori disponibili.
+    Centralized registry for all available document converters.
     
-    Gestisce la registrazione automatica, il recupero e la selezione
-    del convertitore appropriato per una data conversione.
+    Manages automatic registration, retrieval, and selection of the appropriate
+    converter for a given conversion operation. Implements a plugin-like
+    architecture for easy extensibility.
+    
+    Attributes:
+        logger: Logger instance for registry operations
+        
+    Example:
+        >>> registry = ConverterRegistry()
+        >>> registry.register(WordToPDFConverter)
+        >>> converter = registry.get_converter_for_file('document.docx')
+        >>> converter.convert('document.docx', 'output.pdf')
     """
     
-    def __init__(self):
-        """Inizializza il registry"""
-        self.logger = get_logger("ConverterRegistry")
+    def __init__(self) -> None:
+        """Initialize the converter registry with empty mappings."""
+        self.logger: logging.Logger = get_logger("ConverterRegistry")
         self._converters: Dict[str, ConverterBase] = {}
         self._extension_map: Dict[str, List[str]] = {}
     
-    def register(self, converter_class: Type[ConverterBase]):
+    def register(self, converter_class: Type[ConverterBase]) -> None:
         """
-        Registra un nuovo convertitore.
+        Register a new converter class.
+        
+        Instantiates the converter and adds it to the registry, mapping
+        all supported input formats to this converter.
         
         Args:
-            converter_class: Classe del convertitore da registrare
+            converter_class: Converter class to register (not an instance)
         
         Example:
-            registry.register(WordToPDFConverter)
+            >>> registry.register(WordToPDFConverter)
+            >>> registry.register(PDFToWordConverter)
         """
         try:
-            # Istanzia il convertitore
+            # Instantiate converter
             converter = converter_class()
             
-            # Ottieni info
+            # Get converter metadata
             info = converter.get_info()
             name = info['name']
             
-            # Registra
+            # Register converter
             self._converters[name] = converter
             
-            # Mappa estensioni input -> convertitore
+            # Map input extensions to converter
             for ext in info['input_formats']:
                 if ext not in self._extension_map:
                     self._extension_map[ext] = []
                 self._extension_map[ext].append(name)
             
-            self.logger.info(f"Convertitore registrato: {name}")
+            self.logger.info(f"Converter registered: {name}")
             self.logger.debug(f"  Input: {', '.join(info['input_formats'])}")
             self.logger.debug(f"  Output: {info['output_format']}")
             
         except Exception as e:
-            self.logger.error(f"Errore registrazione convertitore {converter_class}: {e}")
+            self.logger.error(f"Error registering converter {converter_class}: {e}")
     
     def get_converter(self, name: str) -> Optional[ConverterBase]:
         """
-        Ottiene un convertitore per nome.
+        Retrieve a converter by name.
         
         Args:
-            name: Nome del convertitore
+            name: Converter name (e.g., 'Word to PDF')
         
         Returns:
-            Istanza del convertitore o None
+            Converter instance if found, None otherwise
+            
+        Example:
+            >>> converter = registry.get_converter('Word to PDF')
         """
         return self._converters.get(name)
     
@@ -74,104 +95,121 @@ class ConverterRegistry:
         output_format: str = '.pdf'
     ) -> Optional[ConverterBase]:
         """
-        Trova il convertitore appropriato per un file.
+        Find appropriate converter for a file.
+        
+        Selects converter based on input file extension and desired output format.
+        If multiple converters support the input format, prefers the one with
+        matching output format.
         
         Args:
-            file_path: Path del file da convertire
-            output_format: Formato di output desiderato
+            file_path: Path to file to convert
+            output_format: Desired output format (default: '.pdf')
         
         Returns:
-            Convertitore appropriato o None
+            Appropriate converter instance or None if no converter found
+            
+        Example:
+            >>> converter = registry.get_converter_for_file('doc.docx', '.pdf')
         """
         extension = Path(file_path).suffix.lower()
         
-        # Trova convertitori che supportano questa estensione
+        # Find converters supporting this extension
         converter_names = self._extension_map.get(extension, [])
         
         if not converter_names:
-            self.logger.warning(f"Nessun convertitore per estensione {extension}")
+            self.logger.warning(f"No converter for extension {extension}")
             return None
         
-        # Trova il convertitore con il formato output corretto
+        # Find converter with matching output format
         for name in converter_names:
             converter = self._converters[name]
             if converter.get_output_extension() == output_format:
                 return converter
         
-        # Se nessuno ha il formato esatto, ritorna il primo disponibile
+        # If no exact match, return first available
         self.logger.warning(
-            f"Formato output {output_format} non disponibile per {extension}, "
-            f"uso {self._converters[converter_names[0]].get_output_extension()}"
+            f"Output format {output_format} not available for {extension}, "
+            f"using {self._converters[converter_names[0]].get_output_extension()}"
         )
         return self._converters[converter_names[0]]
     
     def get_all_converters(self) -> List[ConverterBase]:
         """
-        Ritorna tutti i convertitori registrati.
+        Get all registered converters.
         
         Returns:
-            Lista di convertitori
+            List of all converter instances
         """
         return list(self._converters.values())
     
     def get_supported_input_formats(self) -> List[str]:
         """
-        Ritorna tutte le estensioni di input supportate.
+        Get all supported input file extensions.
         
         Returns:
-            Lista di estensioni
+            List of supported extensions (e.g., ['.docx', '.pdf', '.png'])
         """
         return list(self._extension_map.keys())
     
-    def get_converters_info(self) -> List[Dict]:
+    def get_converters_info(self) -> List[Dict[str, Any]]:
         """
-        Ritorna informazioni su tutti i convertitori.
+        Get metadata for all registered converters.
         
         Returns:
-            Lista di dizionari con info
+            List of converter info dictionaries
         """
         return [conv.get_info() for conv in self._converters.values()]
     
     def is_format_supported(self, extension: str) -> bool:
         """
-        Verifica se un formato è supportato.
+        Check if a file format is supported.
         
         Args:
-            extension: Estensione da verificare (es. '.docx')
+            extension: File extension to check (e.g., '.docx')
         
         Returns:
-            True se supportato
+            True if format is supported by at least one converter
+            
+        Example:
+            >>> registry.is_format_supported('.docx')
+            True
+            >>> registry.is_format_supported('.xyz')
+            False
         """
         return extension.lower() in self._extension_map
     
-    def clear(self):
-        """Rimuove tutti i convertitori registrati"""
+    def clear(self) -> None:
+        """Clear all registered converters."""
         self._converters.clear()
         self._extension_map.clear()
-        self.logger.info("Registry pulito")
+        self.logger.info("Registry cleared")
     
-    def __len__(self):
-        """Ritorna il numero di convertitori registrati"""
+    def __len__(self) -> int:
+        """Return number of registered converters."""
         return len(self._converters)
     
-    def __str__(self):
-        """Rappresentazione stringa del registry"""
+    def __str__(self) -> str:
+        """Return string representation of registry."""
         return (
-            f"ConverterRegistry: {len(self._converters)} convertitori, "
-            f"{len(self._extension_map)} formati supportati"
+            f"ConverterRegistry: {len(self._converters)} converters, "
+            f"{len(self._extension_map)} formats supported"
         )
 
 
-# Istanza globale del registry
-_global_registry = None
+# Global registry instance
+_global_registry: Optional[ConverterRegistry] = None
 
 
 def get_registry() -> ConverterRegistry:
     """
-    Ottiene l'istanza globale del registry.
+    Get the global registry instance (singleton pattern).
     
     Returns:
-        Istanza singleton del ConverterRegistry
+        Singleton instance of ConverterRegistry
+        
+    Example:
+        >>> registry = get_registry()
+        >>> registry.register(MyConverter)
     """
     global _global_registry
     if _global_registry is None:
