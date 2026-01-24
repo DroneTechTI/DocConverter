@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """
-DocConverter - Software Professionale per Conversione Documenti
+DocConverter - Professional Document Conversion Software
 
-Entry point dell'applicazione.
+Application entry point.
 """
 import sys
-import os
+import platform
 from pathlib import Path
+from typing import Dict
 
-# Aggiungi la directory corrente al path per import
+# Add current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-import sys
-import platform
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 
@@ -21,25 +20,29 @@ from config.settings import Settings
 from gui.main_window import MainWindow
 from utils.logger import setup_logger
 
-# Fix icona taskbar Windows
+
+# Fix Windows taskbar icon
 if platform.system() == 'Windows':
     try:
         import ctypes
-        # Imposta AppUserModelID per icona taskbar
-        myappid = 'DocConverter.v2.4.0'
+        # Set AppUserModelID for taskbar icon
+        myappid = 'DocConverter.v2.5.0'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-    except:
+    except Exception:
         pass
 
 
-def check_and_install_dependencies():
+def check_and_install_dependencies() -> bool:
     """
-    Verifica e installa automaticamente dipendenze mancanti
+    Check and automatically install missing dependencies.
+    
+    Returns:
+        True if all dependencies are satisfied, False otherwise
     """
     import subprocess
     
-    # Lista dipendenze critiche
-    critical_deps = {
+    # Critical dependencies mapping
+    critical_deps: Dict[str, str] = {
         'PyQt6': 'PyQt6>=6.6.0',
         'psutil': 'psutil>=5.9.6',
         'docx': 'python-docx>=1.1.0',
@@ -50,7 +53,7 @@ def check_and_install_dependencies():
     
     missing = []
     
-    print("🔍 Verifica dipendenze...")
+    print("🔍 Checking dependencies...")
     
     for module_name, package_name in critical_deps.items():
         try:
@@ -60,99 +63,101 @@ def check_and_install_dependencies():
     
     if missing:
         print()
-        print(f"⚠️  Trovate {len(missing)} dipendenze mancanti")
+        print(f"⚠️  Found {len(missing)} missing dependencies")
         print()
-        print("📦 Installazione automatica in corso...")
+        print("📦 Automatic installation in progress...")
         print()
         
         try:
-            # Installa dipendenze mancanti
+            # Install missing dependencies
             subprocess.check_call([
                 sys.executable, "-m", "pip", "install", "--quiet"
             ] + missing)
             
-            print("✅ Dipendenze installate con successo!")
+            print("✅ Dependencies installed successfully!")
             print()
             return True
             
         except subprocess.CalledProcessError:
             print()
-            print("❌ Errore installazione automatica")
+            print("❌ Automatic installation failed")
             print()
-            print("📋 Installa manualmente con:")
+            print("📋 Install manually with:")
             print(f"   pip install {' '.join(missing)}")
             print()
-            input("Premi ENTER per chiudere...")
+            input("Press ENTER to close...")
             return False
     
     return True
 
 
-def main():
+def main() -> int:
     """
-    Funzione principale dell'applicazione.
+    Main application entry point.
+    
+    Returns:
+        Application exit code
     """
-    # Verifica e installa dipendenze automaticamente
+    # Check and install dependencies automatically
     if not check_and_install_dependencies():
         return 1
     
-    # Assicura che le directory necessarie esistano
+    # Ensure required directories exist
     Settings.ensure_directories()
     
-    # Configura logger
+    # Setup logger
     logger = setup_logger()
     logger.info("=" * 60)
-    logger.info(f"Avvio {Settings.APP_NAME} v{Settings.APP_VERSION}")
+    logger.info(f"Starting {Settings.APP_NAME} v{Settings.APP_VERSION}")
     logger.info("=" * 60)
     
     try:
-        # Crea applicazione Qt
+        # Create Qt application
         app = QApplication(sys.argv)
         
-        # Configura applicazione
+        # Configure application metadata
         app.setApplicationName(Settings.APP_NAME)
         app.setApplicationVersion(Settings.APP_VERSION)
         app.setOrganizationName(Settings.APP_AUTHOR)
         
-        # 🎨 Imposta icona globale app
+        # Set application icon
         icon_path = Settings.BASE_DIR / "assets" / "icon.ico"
         if icon_path.exists():
             app.setWindowIcon(QIcon(str(icon_path)))
-            logger.info(f"✅ Icona app impostata: {icon_path}")
+            logger.info(f"✅ Application icon set: {icon_path}")
         
-        # Abilita high DPI scaling
+        # Enable high DPI scaling
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
             app.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
         if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
             app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
         
-        # Crea e mostra finestra principale
-        logger.info("Inizializzazione interfaccia grafica...")
+        # Create and show main window
+        logger.info("Initializing graphical interface...")
         window = MainWindow()
         window.show()
         
-        logger.info("Applicazione avviata con successo")
-        logger.info(f"Interfaccia pronta - in attesa di input utente")
+        logger.info("Application started successfully")
+        logger.info("Interface ready - waiting for user input")
         
-        # Avvia event loop
+        # Start event loop
         exit_code = app.exec()
         
-        logger.info(f"Applicazione terminata (exit code: {exit_code})")
+        logger.info(f"Application terminated (exit code: {exit_code})")
         return exit_code
     
     except Exception as e:
-        logger.critical(f"Errore fatale: {e}", exc_info=True)
+        logger.critical(f"Fatal error: {e}", exc_info=True)
         
-        # Tenta di mostrare messaggio di errore
+        # Try to show error message
         try:
-            from PyQt6.QtWidgets import QMessageBox
             QMessageBox.critical(
                 None,
-                "Errore Fatale",
-                f"Si è verificato un errore fatale:\n\n{str(e)}\n\n"
-                f"Controlla il file di log per maggiori dettagli."
+                "Fatal Error",
+                f"A fatal error occurred:\n\n{str(e)}\n\n"
+                f"Check the log file for more details."
             )
-        except:
+        except Exception:
             pass
         
         return 1
