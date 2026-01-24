@@ -1,9 +1,13 @@
 """
-Classe base astratta per tutti i convertitori
+Abstract base class for all document converters.
+
+This module provides the foundation for implementing document conversion plugins
+following a consistent interface and contract.
 """
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, Dict, List
+from typing import Callable, Optional, Dict, List, Any
 from pathlib import Path
+import logging
 
 from utils.logger import get_logger
 from utils.error_handler import ConversionError
@@ -11,37 +15,59 @@ from utils.error_handler import ConversionError
 
 class ConverterBase(ABC):
     """
-    Classe base astratta per implementare convertitori di documenti.
+    Abstract base class for implementing document converters.
     
-    Ogni nuovo convertitore deve ereditare da questa classe e implementare
-    i metodi astratti get_info() e convert().
+    Each converter must inherit from this class and implement the abstract
+    methods get_info() and convert(). This ensures a consistent interface
+    across all converter implementations.
+    
+    Attributes:
+        logger: Logger instance for this converter
+        
+    Example:
+        >>> class MyConverter(ConverterBase):
+        ...     def get_info(self) -> Dict[str, Any]:
+        ...         return {
+        ...             'name': 'My Converter',
+        ...             'input_formats': ['.txt'],
+        ...             'output_format': '.pdf',
+        ...             'description': 'Converts text to PDF'
+        ...         }
+        ...     
+        ...     def convert(self, input_path: str, output_path: str, 
+        ...                progress_callback=None, **kwargs) -> bool:
+        ...         # Implementation here
+        ...         return True
     """
     
-    def __init__(self):
-        """Inizializza il convertitore"""
-        self.logger = get_logger(self.__class__.__name__)
-        self._info = None
+    def __init__(self) -> None:
+        """Initialize the converter with logging capabilities."""
+        self.logger: logging.Logger = get_logger(self.__class__.__name__)
+        self._info: Optional[Dict[str, Any]] = None
     
     @abstractmethod
-    def get_info(self) -> Dict:
+    def get_info(self) -> Dict[str, Any]:
         """
-        Ritorna informazioni sul convertitore.
+        Return metadata information about this converter.
         
         Returns:
-            Dizionario con:
-                - name (str): Nome del convertitore
-                - input_formats (List[str]): Formati input supportati (es. ['.doc', '.docx'])
-                - output_format (str): Formato output (es. '.pdf')
-                - description (str): Descrizione convertitore
-                - requires_dependency (Optional[str]): Dipendenza richiesta (es. 'libreoffice')
+            Dictionary containing:
+                - name (str): Human-readable converter name
+                - input_formats (List[str]): Supported input file extensions
+                  (e.g., ['.doc', '.docx'])
+                - output_format (str): Output file extension (e.g., '.pdf')
+                - description (str): Brief converter description
+                - requires_dependency (Optional[str]): External dependency name
+                  if required (e.g., 'libreoffice')
         
         Example:
+            >>> converter.get_info()
             {
                 'name': 'Word to PDF',
                 'input_formats': ['.doc', '.docx'],
                 'output_format': '.pdf',
-                'description': 'Converte documenti Word in PDF',
-                'requires_dependency': 'libreoffice'
+                'description': 'Converts Word documents to PDF format',
+                'requires_dependency': None
             }
         """
         pass
@@ -52,51 +78,65 @@ class ConverterBase(ABC):
         input_path: str,
         output_path: str,
         progress_callback: Optional[Callable[[int, str], None]] = None,
-        **kwargs
+        **kwargs: Any
     ) -> bool:
         """
-        Esegue la conversione del documento.
+        Execute document conversion.
         
         Args:
-            input_path: Path completo del file di input
-            output_path: Path completo del file di output
-            progress_callback: Callback opzionale per aggiornare il progresso.
-                              Firma: callback(percentuale: int, messaggio: str)
-            **kwargs: Parametri aggiuntivi specifici del convertitore
+            input_path: Full path to input file
+            output_path: Full path to output file
+            progress_callback: Optional callback for progress updates.
+                             Signature: callback(percentage: int, message: str)
+            **kwargs: Additional converter-specific parameters
         
         Returns:
-            True se conversione riuscita, False altrimenti
+            True if conversion succeeded, False otherwise
         
         Raises:
-            ConversionError: In caso di errore durante la conversione
+            ConversionError: If conversion fails with details about the error
+            
+        Example:
+            >>> converter.convert('input.docx', 'output.pdf',
+            ...                   progress_callback=lambda p, m: print(f'{p}%: {m}'))
+            True
         """
         pass
     
     def validate_input(self, input_path: str) -> bool:
         """
-        Valida il file di input per questo convertitore.
+        Validate input file for this converter.
+        
+        Checks file existence and whether the file extension is supported
+        by this converter.
         
         Args:
-            input_path: Path del file da validare
+            input_path: Path to file to validate
         
         Returns:
-            True se il file è valido per questo convertitore
+            True if file is valid for this converter, False otherwise
+            
+        Example:
+            >>> converter.validate_input('document.docx')
+            True
+            >>> converter.validate_input('nonexistent.docx')
+            False
         """
         path = Path(input_path)
         
-        # Verifica esistenza file
+        # Check file existence
         if not path.exists():
-            self.logger.error(f"File non trovato: {input_path}")
+            self.logger.error(f"File not found: {input_path}")
             return False
         
-        # Verifica estensione supportata
+        # Check supported extension
         extension = path.suffix.lower()
         info = self.get_info()
         
         if extension not in info['input_formats']:
             self.logger.error(
-                f"Formato {extension} non supportato da {info['name']}. "
-                f"Formati supportati: {', '.join(info['input_formats'])}"
+                f"Format {extension} not supported by {info['name']}. "
+                f"Supported formats: {', '.join(info['input_formats'])}"
             )
             return False
         
@@ -104,69 +144,69 @@ class ConverterBase(ABC):
     
     def _report_progress(
         self,
-        callback: Optional[Callable],
+        callback: Optional[Callable[[int, str], None]],
         percentage: int,
         message: str = ""
-    ):
+    ) -> None:
         """
-        Invia un aggiornamento di progresso alla callback.
+        Send progress update to callback if provided.
         
         Args:
-            callback: Funzione di callback
-            percentage: Percentuale completamento (0-100)
-            message: Messaggio opzionale
+            callback: Progress callback function
+            percentage: Completion percentage (0-100)
+            message: Optional status message
         """
         if callback:
             try:
                 callback(percentage, message)
             except Exception as e:
-                self.logger.error(f"Errore in progress callback: {e}")
+                self.logger.error(f"Error in progress callback: {e}")
     
     def get_supported_extensions(self) -> List[str]:
         """
-        Ritorna le estensioni supportate da questo convertitore.
+        Get list of supported input file extensions.
         
         Returns:
-            Lista di estensioni (es. ['.doc', '.docx'])
+            List of file extensions (e.g., ['.doc', '.docx'])
         """
         return self.get_info()['input_formats']
     
     def get_output_extension(self) -> str:
         """
-        Ritorna l'estensione del file di output.
+        Get output file extension.
         
         Returns:
-            Estensione output (es. '.pdf')
+            Output file extension (e.g., '.pdf')
         """
         return self.get_info()['output_format']
     
     def get_name(self) -> str:
         """
-        Ritorna il nome del convertitore.
+        Get converter name.
         
         Returns:
-            Nome del convertitore
+            Human-readable converter name
         """
         return self.get_info()['name']
     
     def requires_dependency(self) -> Optional[str]:
         """
-        Ritorna la dipendenza richiesta (se presente).
+        Check if converter requires external dependency.
         
         Returns:
-            Nome della dipendenza o None
+            Dependency name if required, None otherwise
         """
         info = self.get_info()
         return info.get('requires_dependency')
     
-    def __str__(self):
-        """Rappresentazione stringa del convertitore"""
+    def __str__(self) -> str:
+        """Return string representation of converter."""
         info = self.get_info()
         return (
             f"{info['name']}: "
             f"{', '.join(info['input_formats'])} → {info['output_format']}"
         )
     
-    def __repr__(self):
-        """Rappresentazione tecnica del convertitore"""
+    def __repr__(self) -> str:
+        """Return technical representation of converter."""
         return f"<{self.__class__.__name__}: {self.get_name()}>"
