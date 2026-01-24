@@ -1,10 +1,11 @@
 """
-Convertitore Excel → PDF
-Supporta formati: .xlsx, .xls → .pdf
+Excel to PDF Converter.
+
+Converts Excel spreadsheets to PDF format using Excel (Windows) or LibreOffice (Linux/macOS).
 """
 import platform
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from core.converter_base import ConverterBase
 from utils.error_handler import ConversionError
@@ -12,23 +13,23 @@ from utils.error_handler import ConversionError
 
 class ExcelToPDFConverter(ConverterBase):
     """
-    Convertitore da Excel a PDF.
+    Excel to PDF converter.
     
-    Windows: Usa Excel installato (se disponibile)
-    Linux/macOS: Usa LibreOffice
+    Windows: Uses installed Excel (if available)
+    Linux/macOS: Uses LibreOffice
     """
     
-    def __init__(self):
-        """Inizializza il convertitore Excel → PDF"""
+    def __init__(self) -> None:
+        """Initialize Excel to PDF converter."""
         super().__init__()
         self._system = platform.system().lower()
-        self._excel_available_cache = None  # Cache rilevamento Excel
-        self._excel_version = None  # Salva versione Excel
+        self._excel_available_cache: Optional[bool] = None  # Cache Excel detection
+        self._excel_version: Optional[str] = None  # Save Excel version
     
     def get_info(self) -> dict:
-        """Ritorna informazioni sul convertitore"""
+        """Return converter metadata."""
         if 'windows' in self._system:
-            requires_dep = None  # Excel/LibreOffice già su sistema
+            requires_dep = None  # Excel/LibreOffice already on system
         else:
             requires_dep = 'libreoffice'
         
@@ -36,7 +37,7 @@ class ExcelToPDFConverter(ConverterBase):
             'name': 'Excel to PDF',
             'input_formats': ['.xlsx', '.xls'],
             'output_format': '.pdf',
-            'description': 'Converte fogli Excel in formato PDF',
+            'description': 'Converts Excel spreadsheets to PDF format',
             'requires_dependency': requires_dep
         }
     
@@ -62,11 +63,11 @@ class ExcelToPDFConverter(ConverterBase):
         Raises:
             ConversionError: In caso di errore durante la conversione
         """
-        self.logger.info(f"Inizio conversione Excel→PDF: {input_path}")
+        self.logger.info(f"Starting Excel→PDF conversion: {input_path}")
         
         try:
-            # Validazione input
-            self._report_progress(progress_callback, 5, "Validazione file...")
+            # Validate input
+            self._report_progress(progress_callback, 5, "Validating file...")
             if not self.validate_input(input_path):
                 raise ConversionError(
                     "File di input non valido",
@@ -87,7 +88,7 @@ class ExcelToPDFConverter(ConverterBase):
                 try:
                     success = self._convert_with_excel(input_file, output_file)
                     if success:
-                        self._report_progress(progress_callback, 100, "Completato!")
+                        self._report_progress(progress_callback, 100, "Completed!")
                         return True
                 except:
                     self.logger.warning("Excel non disponibile, provo LibreOffice")
@@ -107,9 +108,9 @@ class ExcelToPDFConverter(ConverterBase):
             raise
         
         except Exception as e:
-            self.logger.error(f"Errore conversione Excel→PDF: {e}", exc_info=True)
+            self.logger.error(f"Excel→PDF conversion error: {e}", exc_info=True)
             raise ConversionError(
-                f"Errore conversione: {str(e)}",
+                f"Conversion error: {str(e)}",
                 file_path=input_path,
                 details=str(e)
             )
@@ -197,11 +198,11 @@ class ExcelToPDFConverter(ConverterBase):
                 pythoncom.CoUninitialize()
         
         except Exception as e:
-            self.logger.error(f"Errore Excel: {e}")
+            self.logger.error(f"Excel error: {e}")
             return False
     
     def _convert_with_libreoffice(self, input_file: Path, output_file: Path) -> bool:
-        """Conversione con LibreOffice"""
+        """Convert using LibreOffice."""
         import subprocess
         import tempfile
         import shutil
@@ -212,7 +213,7 @@ class ExcelToPDFConverter(ConverterBase):
             is_available, path = checker.check_dependency('libreoffice')
             
             if not is_available:
-                raise ConversionError("LibreOffice non trovato")
+                raise ConversionError("LibreOffice not found")
             
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_output_dir = Path(temp_dir)
@@ -245,5 +246,5 @@ class ExcelToPDFConverter(ConverterBase):
                 return False
         
         except Exception as e:
-            self.logger.error(f"Errore LibreOffice: {e}")
+            self.logger.error(f"LibreOffice error: {e}")
             return False
