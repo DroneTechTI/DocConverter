@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# PyInstaller
+*.spec
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# DocConverter specific
+*.bak
+*_OLD.*
+
+# Development files (hidden from users)
+.dev/
+
+# User scripts and docs (not for GitHub)
+AVVIA.bat
+AVVIA.sh
+*.pyw
+LEGGIMI*.txt
+TEST_*.txt
+ISTRUZIONI*.txt
+INSTALLA*.txt
+_GUIDA_PRIVATA*.txt
+_COME_*.txt
+_BUILD_*.bat
+_BUILD_*.txt
+GITHUB_SETUP_GUIDE.md
+
+# Temp files
+tmp_*
+temp_*
+
+# Documentation drafts (keep only main docs)
+AGGIORNAMENTI_*.md
+AGGIORNAMENTO_*.md
+FIX_v*.md
+NOVITA_v*.md
+OTTIMIZZAZIONE_*.md
+RIEPILOGO_*.md
+QUICK_TEST.md
+TEST_MANUALE.md
+COME_RIMUOVERE_FILE_DA_GITHUB.md
+USA_WORD_NON_LIBREOFFICE.md
+ISTRUZIONI_FINALI.txt
+_COME_PUSHARE.txt
+_PULISCI_FILE_DA_GITHUB.bat
+_PROMPT_ROVO_DEV_PROSSIMA_SESSIONE.txt

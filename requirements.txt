@@ -1,0 +1,39 @@
+# ═══════════════════════════════════════════════════════════
+# DocConverter v2.5.0 - Requirements
+# ═══════════════════════════════════════════════════════════
+
+# GUI Framework
+PyQt6>=6.6.0
+PyQt6-Qt6>=6.6.0
+
+# Document Conversion Libraries
+python-docx>=1.1.0          # Word document reading
+docx2pdf>=0.1.8             # Word to PDF (Windows - perfect formatting)
+pypdf>=3.17.0               # PDF manipulation (merge, compress)
+Pillow>=10.1.0              # Image processing
+reportlab>=4.0.7            # PDF creation (fallback)
+openpyxl>=3.1.0             # Excel file handling
+python-pptx>=0.6.23         # PowerPoint file handling
+
+# PDF Conversions
+pdf2docx>=0.5.6             # PDF to Word conversion
+pdf2image>=1.16.3           # PDF to images
+
+# HTML to PDF
+weasyprint>=60.0            # HTML to PDF conversion
+
+# Office automation (Windows only - optional)
+pywin32>=306; sys_platform == 'win32'
+
+# System utilities
+psutil>=5.9.6               # System monitoring and optimization
+
+# Logging and utilities
+colorlog>=6.8.0             # Colored console logging
+
+# ═══════════════════════════════════════════════════════════
+# Notes:
+# - All conversions use pure Python libraries
+# - No Office/LibreOffice required for Word→PDF
+# - psutil used by MemoryOptimizer and BatchOptimizer
+# ═══════════════════════════════════════════════════════════
