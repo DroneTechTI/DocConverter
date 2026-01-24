@@ -8,347 +8,348 @@
 
 A powerful, cross-platform desktop application for converting documents between multiple formats with a modern graphical interface. Pure Python implementation - no external dependencies required for most conversions!
 
-**Software desktop professionale per la conversione di documenti - Windows & Linux**
+---
 
-![Version](https://img.shields.io/badge/version-2.5.0-blue)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Python](https://img.shields.io/badge/python-3.10+-green)
-![License](https://img.shields.io/badge/license-MIT-orange)
+## 🎯 Overview
 
-## 🎯 Descrizione
+DocConverter is a professional-grade document conversion tool designed for efficiency and ease of use. Built with Python and PyQt6, it provides a modern graphical interface for batch document conversion with real-time progress tracking and comprehensive logging.
 
-DocConverter è un'applicazione desktop moderna e intuitiva per la conversione di documenti tra diversi formati. Progettato con un'architettura modulare, permette di aggiungere facilmente nuovi convertitori in futuro.
-
-**🎉 NOVITÀ v2.0.0 - MAJOR UPDATE:**
-- 🎯 **7 Convertitori Totali** - Era 1, ora 7! (Word, PDF, Excel, PowerPoint, Immagini, HTML)
-- ⚡ **Conversione Word→PDF Ottimizzata** - Ancora più veloce!
-- 🎨 **Avvio Professionale** - Nessun terminale visibile!
-- 💪 **Suite completa** - Copre tutti i formati Office e web!
-
-### ✨ Funzionalità Principali
-
-- **Word → PDF** (.doc, .docx) ⚡ VELOCISSIMO
-- **PDF → Word** (.pdf → .docx) 🆕
-- **PDF → Immagini** (.pdf → .png, .jpg) 🆕
-- **Immagini → PDF** (.png, .jpg, .bmp, .gif → .pdf) 🆕
-- **Excel → PDF** (.xlsx, .xls) 🆕
-- **PowerPoint → PDF** (.pptx, .ppt) 🆕
-- **HTML → PDF** (.html, .htm) 🆕
-- **Interfaccia grafica moderna** e facile da usare
-- **Conversione batch** (multipli file contemporaneamente)
-- **Barra di progresso** in tempo reale
-- **Gestione errori** chiara e comprensibile
-- **Sistema di logging** completo
-- **Drag & Drop** dei file
-- **Controllo dipendenze** automatico
-
-### 🔮 Convertitori Futuri (Architettura Pronta)
-
-- PDF → Word
-- PDF → Immagini (PNG/JPEG)
-- Immagini → PDF
-- TXT → PDF
-- HTML → PDF
+**Key Features:**
+- 🚀 **Pure Python** - No Office/LibreOffice required for most conversions
+- 🔄 **Multiple Formats** - Word, PDF, Excel, PowerPoint, Images, HTML
+- ⚡ **Batch Processing** - Convert multiple files simultaneously with optimized performance
+- 📊 **Real-time Progress** - Live progress bars and status updates
+- 🎨 **Modern UI** - Clean, intuitive interface with drag-and-drop support
+- 🌍 **Cross-platform** - Works on Windows, Linux, and macOS
+- 📝 **Comprehensive Logging** - Detailed logs for troubleshooting
+- 🔧 **Extensible Architecture** - Easy to add new converters
 
 ---
 
-## 💻 Requisiti di Sistema
+## ✨ Supported Conversions
 
-### Windows
-- Windows 10 o superiore
-- Python 3.10+ (installato automaticamente con l'installer)
-- **Microsoft Word** (già presente in Office) - CONSIGLIATO per conversioni veloci
-- Oppure LibreOffice (alternativa gratuita)
-- 200 MB di spazio libero
+### Currently Available
 
-### Linux
-- Ubuntu 20.04+ / Debian 11+ / Fedora 35+ (o equivalenti)
-- Python 3.10+
-- LibreOffice (per conversione Word→PDF)
+| From | To | Library | External Dependencies |
+|------|----|---------|-----------------------|
+| 📝 Word (.docx, .doc) | 📄 PDF | python-docx + reportlab | ❌ None |
+| 📄 PDF | 📝 Word (.docx) | pdf2docx | ❌ None |
+| 🖼️ Images (PNG, JPG, BMP, GIF, TIFF) | 📄 PDF | Pillow | ❌ None |
+| 📄 PDF | 🖼️ Images | pdf2image | ❌ None |
+| 📊 Excel (.xlsx, .xls) | 📄 PDF | openpyxl + reportlab | ❌ None |
+| 🎨 PowerPoint (.pptx) | 📄 PDF | python-pptx + reportlab | ❌ None |
+| 🌐 HTML | 📄 PDF | weasyprint | ❌ None |
+| 📑 PDF Merge | 📄 PDF | pypdf | ❌ None |
+| 🗜️ PDF Compress | 📄 PDF | pypdf | ❌ None |
+
+### Plugin Architecture Ready
+
+The modular architecture allows easy addition of new converters. Simply extend `ConverterBase` and register your converter!
 
 ---
 
-## 📦 Installazione
+## 💻 System Requirements
 
 ### Windows
-
-1. **Scarica l'installer** `DocConverter-Setup.exe`
-2. **Esegui l'installer** e segui le istruzioni
-3. **Avvia l'applicazione** dal menu Start o desktop
+- **OS**: Windows 10 or later (64-bit recommended)
+- **Python**: 3.8 or higher
+- **RAM**: 4GB minimum, 8GB recommended
+- **Disk Space**: 200MB for application + dependencies
 
 ### Linux
+- **OS**: Any modern distribution (Ubuntu 20.04+, Fedora 35+, etc.)
+- **Python**: 3.8 or higher
+- **RAM**: 4GB minimum, 8GB recommended
+- **Disk Space**: 200MB for application + dependencies
 
-#### Metodo 1: Installazione da sorgenti (consigliato)
+### macOS
+- **OS**: macOS 10.14 (Mojave) or later
+- **Python**: 3.8 or higher
+- **RAM**: 4GB minimum, 8GB recommended
+
+---
+
+## 📦 Installation
+
+### Quick Start (All Platforms)
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/DevilStyle/DocConverter.git
+   cd DocConverter
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the application:**
+   ```bash
+   python main.py
+   ```
+
+### Virtual Environment (Recommended)
 
 ```bash
-# Clona il repository
-git clone https://github.com/TUO_USERNAME/DocConverter.git
-cd DocConverter
+# Create virtual environment
+python -m venv venv
 
-# Installa dipendenze sistema
-sudo apt-get update
-sudo apt-get install -y python3-pip python3-venv libreoffice
+# Activate (Windows)
+venv\Scripts\activate
 
-# Crea ambiente virtuale
-python3 -m venv venv
+# Activate (Linux/macOS)
 source venv/bin/activate
 
-# Installa dipendenze Python
+# Install dependencies
 pip install -r requirements.txt
 
-# Avvia l'applicazione
+# Run
 python main.py
 ```
 
-#### Metodo 2: AppImage (disponibile in futuro)
+---
+
+## 🚀 Usage
+
+### Graphical Interface
+
+1. Launch the application: `python main.py`
+2. Drag and drop files or click "📁 Add Files"
+3. Select conversion type from dropdown
+4. (Optional) Choose output folder
+5. Click "🚀 Convert All"
+6. Monitor progress in real-time
+
+### Batch Conversion
+
+Convert multiple files at once:
+- Add all files to the queue
+- The batch optimizer automatically parallelizes conversions
+- Memory optimizer ensures efficient resource usage
+- Progress is tracked per file with overall completion percentage
+
+### Command Line (Future)
 
 ```bash
-chmod +x DocConverter-x86_64.AppImage
-./DocConverter-x86_64.AppImage
+# Single file conversion
+python main.py convert input.docx output.pdf
+
+# Batch conversion
+python main.py convert-batch input_folder/ output_folder/ --format pdf
 ```
 
 ---
 
-## 🚀 Utilizzo
-
-### 🌟 Avvio Professionale (NUOVO!)
-
-**Windows - Senza Terminale:**
-```cmd
-# Doppio click su uno di questi:
-DocConverter.pyw       ← Avvio immediato (professionale!)
-start_pro.bat         ← Con installazione automatica dipendenze
-```
-
-**Linux/macOS:**
-```bash
-./start_pro.sh        ← Setup completo + avvio pulito
-python3 DocConverter.pyw  ← Avvio diretto
-```
-
-**Risultato:** L'app si apre SENZA finestra terminale nera! 🎉
-
-### Avvio Rapido
-
-1. **Apri DocConverter** (usa `DocConverter.pyw` per esperienza professionale!)
-2. **Seleziona i file** da convertire (pulsante "Seleziona File" o drag & drop)
-3. **Scegli la cartella di destinazione** (opzionale, default: stessa cartella dei file originali)
-4. **Clicca su "Converti"**
-5. **Attendi il completamento** (monitora la barra di progresso)
-
-### Conversione Batch
-
-Per convertire più file:
-- Seleziona multipli file tramite il selettore (Ctrl+Click o Shift+Click)
-- Oppure trascina più file nell'area di drop
-- Tutti i file verranno convertiti in sequenza
-
-### Visualizzazione Log
-
-I log delle operazioni sono visibili in tempo reale nella sezione inferiore dell'interfaccia e salvati in `logs/docconverter.log`
-
----
-
-## 📁 Struttura del Progetto
+## 📁 Project Structure
 
 ```
 DocConverter/
+├── main.py                 # Application entry point
+├── requirements.txt        # Python dependencies
+├── README.md              # This file
+├── LICENSE                # MIT License
+├── CHANGELOG.md           # Version history
 │
-├── main.py                     # Entry point dell'applicazione
-├── requirements.txt            # Dipendenze Python
-├── README.md                   # Questa documentazione
-├── .gitignore                  # File da ignorare in Git
+├── assets/                # Application resources
+│   ├── icon.ico          # Windows icon
+│   └── icon.png          # Cross-platform icon
 │
-├── core/                       # Core business logic
-│   ├── __init__.py
-│   ├── converter_base.py       # Classe base astratta per convertitori
-│   ├── converter_registry.py   # Registro dei convertitori disponibili
-│   └── dependency_checker.py   # Controllo dipendenze sistema
+├── config/                # Configuration modules
+│   ├── settings.py       # Application settings
+│   ├── i18n.py          # Internationalization
+│   └── user_settings.py  # User preferences
 │
-├── converters/                 # Moduli di conversione specifici
-│   ├── __init__.py
-│   ├── word_to_pdf.py          # Convertitore Word → PDF
-│   └── README.md               # Guida per aggiungere nuovi convertitori
+├── core/                  # Core architecture
+│   ├── converter_base.py      # Abstract base class
+│   ├── converter_registry.py  # Converter management
+│   └── dependency_checker.py  # Dependency validation
 │
-├── gui/                        # Interfaccia grafica
-│   ├── __init__.py
-│   ├── main_window.py          # Finestra principale
-│   ├── widgets/                # Widget personalizzati
-│   │   ├── __init__.py
-│   │   ├── file_list.py        # Lista file con drag & drop
-│   │   └── progress_bar.py     # Barra progresso avanzata
-│   └── styles/                 # Stili e temi
-│       ├── __init__.py
-│       └── dark_theme.py       # Tema scuro moderno
+├── converters/            # Converter implementations
+│   ├── word_to_pdf.py
+│   ├── pdf_to_word.py
+│   ├── images_to_pdf.py
+│   ├── pdf_to_images.py
+│   ├── excel_to_pdf.py
+│   ├── powerpoint_to_pdf.py
+│   ├── html_to_pdf.py
+│   ├── pdf_merge.py
+│   └── pdf_compress.py
 │
-├── utils/                      # Utilities e helper
-│   ├── __init__.py
-│   ├── logger.py               # Sistema di logging
-│   ├── file_handler.py         # Gestione file e path
-│   └── error_handler.py        # Gestione errori centralizzata
+├── gui/                   # Graphical interface
+│   ├── main_window.py    # Main application window
+│   ├── styles/           # UI themes
+│   └── widgets/          # Custom widgets
 │
-├── config/                     # Configurazioni
-│   ├── __init__.py
-│   └── settings.py             # Impostazioni applicazione
+├── utils/                 # Utility modules
+│   ├── logger.py         # Logging system
+│   ├── error_handler.py  # Error management
+│   ├── file_handler.py   # File operations
+│   ├── batch_optimizer.py    # Batch processing
+│   └── memory_optimizer.py   # Memory management
 │
-├── logs/                       # File di log (generato automaticamente)
-│
-└── tests/                      # Test unitari
-    ├── __init__.py
-    └── test_converters.py
+└── tests/                 # Unit tests
+    ├── test_converters.py
+    └── test_new_features.py
 ```
 
 ---
 
-## 🛠️ Sviluppo
+## 🛠️ Development
 
-### Aggiungere un Nuovo Convertitore
+### Adding a New Converter
 
-1. Crea un nuovo file in `converters/` (es. `pdf_to_word.py`)
-2. Eredita da `ConverterBase`
-3. Implementa i metodi `convert()` e `get_info()`
-4. Registra il convertitore nel registry
-
-Esempio:
+1. Create a new file in `converters/`:
 
 ```python
 from core.converter_base import ConverterBase
+from utils.error_handler import ConversionError
 
-class PDFToWordConverter(ConverterBase):
+class MyConverter(ConverterBase):
     def get_info(self):
         return {
-            'name': 'PDF to Word',
-            'input_formats': ['.pdf'],
-            'output_format': '.docx',
-            'description': 'Converte PDF in Word'
+            'name': 'My Converter',
+            'input_formats': ['.ext1', '.ext2'],
+            'output_format': '.pdf',
+            'description': 'Converts my format to PDF',
+            'requires_dependency': None
         }
     
-    def convert(self, input_path, output_path, progress_callback=None):
-        # Implementa la logica di conversione
-        pass
+    def convert(self, input_path, output_path, progress_callback=None, **kwargs):
+        # Implement conversion logic
+        return True
 ```
 
-### Eseguire i Test
+2. Register in `converters/__init__.py`:
+
+```python
+from .my_converter import MyConverter
+registry.register(MyConverter)
+```
+
+### Running Tests
 
 ```bash
-# Attiva l'ambiente virtuale
-source venv/bin/activate  # Linux/Mac
-# oppure
-venv\Scripts\activate  # Windows
-
-# Esegui i test
+# Run all tests
 python -m pytest tests/
+
+# Run specific test file
+python -m pytest tests/test_converters.py
+
+# Run with coverage
+python -m pytest --cov=. tests/
 ```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Windows
+### Common Issues
 
-**Errore: "LibreOffice non trovato"**
-- L'installer installa automaticamente LibreOffice portable
-- Se l'errore persiste, riavvia l'applicazione
-
-### Linux
-
-**Errore: "soffice: command not found"**
+**Import Errors**
 ```bash
-sudo apt-get install libreoffice
+pip install -r requirements.txt --upgrade
 ```
 
-**Errore: "Permission denied"**
+**Permission Errors**
+- Ensure files are not open in other applications
+- Check file/folder permissions
+- Run as administrator (if necessary)
+
+**Missing Libraries**
+The application auto-installs missing Python packages on first run. If auto-install fails:
 ```bash
-chmod +x start.sh
-./start.sh
+pip install python-docx pypdf Pillow reportlab openpyxl python-pptx weasyprint pdf2docx pdf2image colorlog psutil
 ```
 
-### Generale
+**GUI Not Starting**
+- Verify PyQt6 installation: `pip install PyQt6 --upgrade`
+- Check Python version: `python --version` (must be 3.8+)
 
-**L'applicazione non si avvia**
-- Verifica di avere Python 3.10+ installato: `python --version`
-- Reinstalla le dipendenze: `pip install -r requirements.txt --force-reinstall`
-- Controlla i log in `logs/docconverter.log`
+### Logs
 
----
-
-## 📝 Changelog
-
-### v2.3.0 (2026-01-09) - SPEED OPTIMIZATION ⚡
-- ⚡ **CONVERSIONI ULTRA-VELOCI** - Cache rilevamento Office (no rilevamenti multipli!)
-- 🚀 Word: Solo COM diretto (docx2pdf rimosso - instabile)
-- ⚡ Excel & PowerPoint: Cache rilevamento per velocità massima
-- 📊 **Miglioramento**: 2-3x più veloce nelle conversioni multiple
-- 🎯 Zero attese inutili - conversione istantanea dopo prima rilevazione
-- 💾 Cache intelligente salvata in memoria per sessione
-
-### v2.2.1 (2026-01-09) - DETECTION IMPROVEMENT
-- 🔍 **Rilevamento SPECIFICO** di Word, Excel, PowerPoint (non "Office" generico)
-- ✅ Ricerca mirata per ogni applicazione singolarmente
-- 💪 Log migliorati con emoji e messaggi chiari
-- 🎯 Controlli più precisi con pythoncom.CoInitialize()
-- 📝 Codice ottimizzato per tutte e 3 le applicazioni Office
-
-### v2.0.0 (2026-01-09) - MAJOR UPDATE
-- 🎯 **7 Convertitori Totali** - Da 1 a 7! (600% più potente)
-- 🆕 PDF → Word, PDF → Immagini, Immagini → PDF
-- 🆕 Excel → PDF, PowerPoint → PDF, HTML → PDF
-- ⚡ Ottimizzazione Word→PDF con `keep_active=True`
-- 🎨 **Launcher professionale** - `DocConverter.pyw` senza terminale!
-- 📝 `start_pro.bat` e `start_pro.sh` per avvio pulito
-- 💪 Rilevamento automatico Office nativo su Windows
-- 🐛 Gestione migliorata trasparenza immagini
-- 📚 Dipendenze aggiornate per nuovi convertitori
-- 📖 Documentazione completa aggiornata
-- ✅ Vedi `NOVITA_v2.0.md` per dettagli completi
-
-### v1.1.0 (2026-01-09) - PERFORMANCE UPDATE
-- ⚡ **Avvio 5x più veloce** con lazy loading degli import
-- 🎯 **Usa Microsoft Word su Windows** - niente LibreOffice necessario!
-- 🚀 **Conversioni 4x più veloci** con Word installato
-- 💪 **Rilevamento automatico** del metodo migliore
-- ✅ Fallback intelligente a LibreOffice se necessario
-- 📝 Vedi `AGGIORNAMENTI_v1.1.md` per dettagli completi
-
-### v1.0.0 (2026-01-09)
-- 🎉 Rilascio iniziale
-- ✅ Conversione Word → PDF
-- ✅ Interfaccia grafica moderna
-- ✅ Conversione batch
-- ✅ Sistema di logging
-- ✅ Architettura modulare per futuri convertitori
+Application logs are stored in `logs/docconverter.log` with automatic rotation (max 10MB, 5 backups).
 
 ---
 
-## 📄 Licenza
+## 📝 Version History
 
-Questo progetto è rilasciato sotto licenza MIT. Vedi il file `LICENSE` per dettagli.
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
----
-
-## 👤 Autore
-
-Sviluppato con ❤️ per fornire uno strumento semplice e potente di conversione documenti.
-
----
-
-## 🤝 Contributi
-
-I contributi sono benvenuti! Per modifiche importanti:
-1. Fai un fork del progetto
-2. Crea un branch per la tua feature (`git checkout -b feature/AmazingFeature`)
-3. Committa le tue modifiche (`git commit -m 'Add some AmazingFeature'`)
-4. Pusha il branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+**Current Version: 2.5.0**
+- Complete English translation
+- Professional code refactoring
+- Enhanced type hints and documentation
+- Improved architecture and modularity
 
 ---
 
-## 📧 Supporto
+## 📄 License
 
-Per bug, domande o suggerimenti, apri una Issue su GitHub.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License
+
+Copyright (c) 2026 DocConverter Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+```
 
 ---
 
-**⭐ Se questo progetto ti è stato utile, lascia una stella su GitHub!**
+## 👤 Author
+
+**DocConverter Team**
+- GitHub: [@DevilStyle](https://github.com/DevilStyle)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow PEP 8 style guidelines
+- Add type hints to all functions
+- Write comprehensive docstrings (Google style)
+- Include unit tests for new features
+- Update documentation as needed
+
+---
+
+## ⭐ Show Your Support
+
+If you find this project useful, please consider giving it a star on GitHub!
+
+---
+
+## 📧 Support
+
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Check existing documentation
+- Review closed issues for solutions
+
+---
+
+**Made with ❤️ by DocConverter Team**
