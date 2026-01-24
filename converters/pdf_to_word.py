@@ -1,6 +1,7 @@
 """
-Convertitore PDF → Word
-Supporta formato: .pdf → .docx
+PDF to Word Converter.
+
+Converts PDF documents to editable Word (.docx) format using pdf2docx library.
 """
 from pathlib import Path
 from typing import Optional, Callable
@@ -11,22 +12,22 @@ from utils.error_handler import ConversionError
 
 class PDFToWordConverter(ConverterBase):
     """
-    Convertitore da PDF a Word (.docx).
+    PDF to Word (.docx) converter.
     
-    Usa pdf2docx per estrarre testo e formattazione da PDF.
+    Uses pdf2docx library to extract text and formatting from PDF documents.
     """
     
-    def __init__(self):
-        """Inizializza il convertitore PDF → Word"""
+    def __init__(self) -> None:
+        """Initialize PDF to Word converter."""
         super().__init__()
     
     def get_info(self) -> dict:
-        """Ritorna informazioni sul convertitore"""
+        """Return converter metadata."""
         return {
             'name': 'PDF to Word',
             'input_formats': ['.pdf'],
             'output_format': '.docx',
-            'description': 'Converte documenti PDF in formato Word modificabile',
+            'description': 'Converts PDF documents to editable Word format',
             'requires_dependency': None
         }
     
@@ -38,67 +39,67 @@ class PDFToWordConverter(ConverterBase):
         **kwargs
     ) -> bool:
         """
-        Converte un documento PDF in Word.
+        Convert PDF document to Word format.
         
         Args:
-            input_path: Path del file PDF da convertire
-            output_path: Path del file Word di output
-            progress_callback: Callback per aggiornamenti progresso
-            **kwargs: Parametri aggiuntivi
+            input_path: Path to PDF file to convert
+            output_path: Path for output Word file
+            progress_callback: Optional callback for progress updates
+            **kwargs: Additional parameters
         
         Returns:
-            True se conversione riuscita
+            True if conversion succeeded
         
         Raises:
-            ConversionError: In caso di errore durante la conversione
+            ConversionError: If conversion fails
         """
-        self.logger.info(f"Inizio conversione PDF→Word: {input_path}")
+        self.logger.info(f"Starting PDF→Word conversion: {input_path}")
         
         try:
-            # Validazione input
-            self._report_progress(progress_callback, 5, "Validazione file...")
+            # Validate input
+            self._report_progress(progress_callback, 5, "Validating file...")
             if not self.validate_input(input_path):
                 raise ConversionError(
-                    "File di input non valido",
+                    "Invalid input file",
                     file_path=input_path
                 )
             
-            # Import libreria
-            self._report_progress(progress_callback, 10, "Caricamento librerie...")
+            # Import library
+            self._report_progress(progress_callback, 10, "Loading libraries...")
             try:
                 from pdf2docx import Converter
             except ImportError:
                 raise ConversionError(
-                    "Libreria pdf2docx non installata",
-                    details="Installa con: pip install pdf2docx"
+                    "pdf2docx library not installed",
+                    details="Install with: pip install pdf2docx"
                 )
             
-            # Prepara path
+            # Prepare paths
             input_file = Path(input_path).resolve()
             output_file = Path(output_path).resolve()
             output_dir = output_file.parent
             
-            # Assicura che la directory di output esista
+            # Ensure output directory exists
             output_dir.mkdir(parents=True, exist_ok=True)
             
-            # Conversione
-            self._report_progress(progress_callback, 30, "Conversione in corso...")
+            # Convert
+            self._report_progress(progress_callback, 30, "Converting...")
             
             cv = Converter(str(input_file))
             cv.convert(str(output_file), start=0, end=None)
             cv.close()
             
-            self._report_progress(progress_callback, 90, "Finalizzazione...")
+            self._report_progress(progress_callback, 90, "Finalizing...")
             
-            # Verifica output
+            # Verify output
             if not output_file.exists() or output_file.stat().st_size == 0:
                 raise ConversionError(
-                    "File Word non generato",
+                    "Word file not generated",
                     file_path=input_path
                 )
             
-            self._report_progress(progress_callback, 100, "Completato!")
-            self.logger.info(f"Conversione completata: {output_file}")
+            self._report_progress(progress_callback, 100, "Completed!")
+            self.logger.info(f"Conversion completed: {output_file}")
             
             return True
         
@@ -106,9 +107,9 @@ class PDFToWordConverter(ConverterBase):
             raise
         
         except Exception as e:
-            self.logger.error(f"Errore conversione PDF→Word: {e}", exc_info=True)
+            self.logger.error(f"PDF→Word conversion error: {e}", exc_info=True)
             raise ConversionError(
-                f"Errore conversione: {str(e)}",
+                f"Conversion error: {str(e)}",
                 file_path=input_path,
                 details=str(e)
             )
