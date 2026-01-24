@@ -34,13 +34,11 @@ if platform.system() == 'Windows':
 
 def check_and_install_dependencies() -> bool:
     """
-    Check and automatically install missing dependencies.
+    Check if critical dependencies are available.
     
     Returns:
         True if all dependencies are satisfied, False otherwise
     """
-    import subprocess
-    
     # Critical dependencies mapping
     critical_deps: Dict[str, str] = {
         'PyQt6': 'PyQt6>=6.6.0',
@@ -53,8 +51,6 @@ def check_and_install_dependencies() -> bool:
     
     missing = []
     
-    print("🔍 Checking dependencies...")
-    
     for module_name, package_name in critical_deps.items():
         try:
             __import__(module_name)
@@ -63,30 +59,16 @@ def check_and_install_dependencies() -> bool:
     
     if missing:
         print()
-        print(f"⚠️  Found {len(missing)} missing dependencies")
+        print("❌ Missing required dependencies:")
         print()
-        print("📦 Automatic installation in progress...")
+        for pkg in missing:
+            print(f"   • {pkg}")
         print()
-        
-        try:
-            # Install missing dependencies
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install", "--quiet"
-            ] + missing)
-            
-            print("✅ Dependencies installed successfully!")
-            print()
-            return True
-            
-        except subprocess.CalledProcessError:
-            print()
-            print("❌ Automatic installation failed")
-            print()
-            print("📋 Install manually with:")
-            print(f"   pip install {' '.join(missing)}")
-            print()
-            input("Press ENTER to close...")
-            return False
+        print("📋 Install with:")
+        print(f"   pip install {' '.join(missing)}")
+        print()
+        input("Press ENTER to close...")
+        return False
     
     return True
 
@@ -98,7 +80,7 @@ def main() -> int:
     Returns:
         Application exit code
     """
-    # Check and install dependencies automatically
+    # Check dependencies
     if not check_and_install_dependencies():
         return 1
     
