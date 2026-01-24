@@ -1,9 +1,10 @@
 """
-Convertitore HTML → PDF
-Supporta formati: .html, .htm → .pdf
+HTML to PDF Converter.
+
+Converts HTML pages to PDF format using weasyprint or pdfkit.
 """
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from core.converter_base import ConverterBase
 from utils.error_handler import ConversionError
@@ -11,22 +12,22 @@ from utils.error_handler import ConversionError
 
 class HTMLToPDFConverter(ConverterBase):
     """
-    Convertitore da HTML a PDF.
+    HTML to PDF converter.
     
-    Usa pdfkit/wkhtmltopdf per rendering HTML→PDF.
+    Uses pdfkit/wkhtmltopdf for HTML→PDF rendering.
     """
     
-    def __init__(self):
-        """Inizializza il convertitore HTML → PDF"""
+    def __init__(self) -> None:
+        """Initialize HTML to PDF converter."""
         super().__init__()
     
     def get_info(self) -> dict:
-        """Ritorna informazioni sul convertitore"""
+        """Return converter metadata."""
         return {
             'name': 'HTML to PDF',
             'input_formats': ['.html', '.htm'],
             'output_format': '.pdf',
-            'description': 'Converte pagine HTML in formato PDF',
+            'description': 'Converts HTML pages to PDF format',
             'requires_dependency': None
         }
     
@@ -38,65 +39,65 @@ class HTMLToPDFConverter(ConverterBase):
         **kwargs
     ) -> bool:
         """
-        Converte un file HTML in PDF.
+        Convert HTML file to PDF.
         
         Args:
-            input_path: Path del file HTML da convertire
-            output_path: Path del file PDF di output
-            progress_callback: Callback per aggiornamenti progresso
-            **kwargs: Parametri aggiuntivi
+            input_path: Path to HTML file to convert
+            output_path: Path for output PDF file
+            progress_callback: Optional callback for progress updates
+            **kwargs: Additional parameters
         
         Returns:
-            True se conversione riuscita
+            True if conversion succeeded
         
         Raises:
-            ConversionError: In caso di errore durante la conversione
+            ConversionError: If conversion fails
         """
-        self.logger.info(f"Inizio conversione HTML→PDF: {input_path}")
+        self.logger.info(f"Starting HTML→PDF conversion: {input_path}")
         
         try:
-            # Validazione input
-            self._report_progress(progress_callback, 5, "Validazione file...")
+            # Validate input
+            self._report_progress(progress_callback, 5, "Validating file...")
             if not self.validate_input(input_path):
                 raise ConversionError(
-                    "File di input non valido",
+                    "Invalid input file",
                     file_path=input_path
                 )
             
-            # Import librerie (prova diversi metodi)
-            self._report_progress(progress_callback, 10, "Caricamento librerie...")
+            # Import libraries (try different methods)
+            self._report_progress(progress_callback, 10, "Loading libraries...")
             
-            # Metodo 1: weasyprint (puro Python, nessuna dipendenza esterna)
+            # Method 1: weasyprint (pure Python, no external dependencies)
             try:
                 from weasyprint import HTML
                 method = 'weasyprint'
-                self.logger.info("Usando weasyprint per conversione")
+                self.logger.info("Using weasyprint for conversion")
             except ImportError:
-                # Metodo 2: pdfkit (richiede wkhtmltopdf)
+                # Method 2: pdfkit (requires wkhtmltopdf)
                 try:
                     import pdfkit
                     method = 'pdfkit'
-                    self.logger.info("Usando pdfkit per conversione")
+                    self.logger.info("Using pdfkit for conversion")
                 except ImportError:
                     raise ConversionError(
-                        "Nessuna libreria HTML→PDF disponibile",
+                        "No HTML→PDF library available",
                         details=(
-                            "Installa una di queste librerie:\n"
-                            "  pip install weasyprint (consigliato)\n"
-                            "  pip install pdfkit (richiede wkhtmltopdf)"
+                            "Install one of these libraries:\n"
+                            "  pip install weasyprint (recommended)\n"
+                            "  pip install pdfkit (requires wkhtmltopdf)"
                         )
                     )
             
-            # Prepara path
+            # Prepare paths
             input_file = Path(input_path).resolve()
             output_file = Path(output_path).resolve()
             output_dir = output_file.parent
             
-            # Assicura che la directory di output esista
+            # Ensure output directory exists
             output_dir.mkdir(parents=True, exist_ok=True)
             
-            # Conversione
-            self._report_progress(progress_callback, 30, "Conversione in corso...")
+            # Convert
+            self._report_progress(progress_callback, 30, "Converting...")
             
             if method == 'weasyprint':
                 HTML(filename=str(input_file)).write_pdf(str(output_file))
@@ -104,15 +105,15 @@ class HTMLToPDFConverter(ConverterBase):
                 import pdfkit
                 pdfkit.from_file(str(input_file), str(output_file))
             
-            # Verifica output
+            # Verify output
             if not output_file.exists() or output_file.stat().st_size == 0:
                 raise ConversionError(
-                    "File PDF non generato",
+                    "PDF file not generated",
                     file_path=input_path
                 )
             
-            self._report_progress(progress_callback, 100, "Completato!")
-            self.logger.info(f"Conversione completata: {output_file}")
+            self._report_progress(progress_callback, 100, "Completed!")
+            self.logger.info(f"Conversion completed: {output_file}")
             
             return True
         
@@ -120,9 +121,9 @@ class HTMLToPDFConverter(ConverterBase):
             raise
         
         except Exception as e:
-            self.logger.error(f"Errore conversione HTML→PDF: {e}", exc_info=True)
+            self.logger.error(f"HTML→PDF conversion error: {e}", exc_info=True)
             raise ConversionError(
-                f"Errore conversione: {str(e)}",
+                f"Conversion error: {str(e)}",
                 file_path=input_path,
                 details=str(e)
             )

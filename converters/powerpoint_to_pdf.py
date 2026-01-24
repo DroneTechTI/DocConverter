@@ -1,10 +1,11 @@
 """
-Convertitore PowerPoint → PDF
-Supporta formati: .pptx, .ppt → .pdf
+PowerPoint to PDF Converter.
+
+Converts PowerPoint presentations to PDF format using PowerPoint (Windows) or LibreOffice (Linux/macOS).
 """
 import platform
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from core.converter_base import ConverterBase
 from utils.error_handler import ConversionError
@@ -12,23 +13,23 @@ from utils.error_handler import ConversionError
 
 class PowerPointToPDFConverter(ConverterBase):
     """
-    Convertitore da PowerPoint a PDF.
+    PowerPoint to PDF converter.
     
-    Windows: Usa PowerPoint installato (se disponibile)
-    Linux/macOS: Usa LibreOffice
+    Windows: Uses installed PowerPoint (if available)
+    Linux/macOS: Uses LibreOffice
     """
     
-    def __init__(self):
-        """Inizializza il convertitore PowerPoint → PDF"""
+    def __init__(self) -> None:
+        """Initialize PowerPoint to PDF converter."""
         super().__init__()
         self._system = platform.system().lower()
-        self._powerpoint_available_cache = None  # Cache rilevamento PowerPoint
-        self._powerpoint_version = None  # Salva versione PowerPoint
+        self._powerpoint_available_cache: Optional[bool] = None  # Cache PowerPoint detection
+        self._powerpoint_version: Optional[str] = None  # Save PowerPoint version
     
     def get_info(self) -> dict:
-        """Ritorna informazioni sul convertitore"""
+        """Return converter metadata."""
         if 'windows' in self._system:
-            requires_dep = None  # PowerPoint/LibreOffice già su sistema
+            requires_dep = None  # PowerPoint/LibreOffice already on system
         else:
             requires_dep = 'libreoffice'
         
@@ -36,7 +37,7 @@ class PowerPointToPDFConverter(ConverterBase):
             'name': 'PowerPoint to PDF',
             'input_formats': ['.pptx', '.ppt'],
             'output_format': '.pdf',
-            'description': 'Converte presentazioni PowerPoint in formato PDF',
+            'description': 'Converts PowerPoint presentations to PDF format',
             'requires_dependency': requires_dep
         }
     
@@ -62,11 +63,11 @@ class PowerPointToPDFConverter(ConverterBase):
         Raises:
             ConversionError: In caso di errore durante la conversione
         """
-        self.logger.info(f"Inizio conversione PowerPoint→PDF: {input_path}")
+        self.logger.info(f"Starting PowerPoint→PDF conversion: {input_path}")
         
         try:
-            # Validazione input
-            self._report_progress(progress_callback, 5, "Validazione file...")
+            # Validate input
+            self._report_progress(progress_callback, 5, "Validating file...")
             if not self.validate_input(input_path):
                 raise ConversionError(
                     "File di input non valido",
@@ -87,7 +88,7 @@ class PowerPointToPDFConverter(ConverterBase):
                 try:
                     success = self._convert_with_powerpoint(input_file, output_file)
                     if success:
-                        self._report_progress(progress_callback, 100, "Completato!")
+                        self._report_progress(progress_callback, 100, "Completed!")
                         return True
                 except:
                     self.logger.warning("PowerPoint non disponibile, provo LibreOffice")
@@ -107,9 +108,9 @@ class PowerPointToPDFConverter(ConverterBase):
             raise
         
         except Exception as e:
-            self.logger.error(f"Errore conversione PowerPoint→PDF: {e}", exc_info=True)
+            self.logger.error(f"PowerPoint→PDF conversion error: {e}", exc_info=True)
             raise ConversionError(
-                f"Errore conversione: {str(e)}",
+                f"Conversion error: {str(e)}",
                 file_path=input_path,
                 details=str(e)
             )
@@ -196,11 +197,11 @@ class PowerPointToPDFConverter(ConverterBase):
                 pythoncom.CoUninitialize()
         
         except Exception as e:
-            self.logger.error(f"Errore PowerPoint: {e}")
+            self.logger.error(f"PowerPoint error: {e}")
             return False
     
     def _convert_with_libreoffice(self, input_file: Path, output_file: Path) -> bool:
-        """Conversione con LibreOffice"""
+        """Convert using LibreOffice."""
         import subprocess
         import tempfile
         import shutil
@@ -211,7 +212,7 @@ class PowerPointToPDFConverter(ConverterBase):
             is_available, path = checker.check_dependency('libreoffice')
             
             if not is_available:
-                raise ConversionError("LibreOffice non trovato")
+                raise ConversionError("LibreOffice not found")
             
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_output_dir = Path(temp_dir)
@@ -244,5 +245,5 @@ class PowerPointToPDFConverter(ConverterBase):
                 return False
         
         except Exception as e:
-            self.logger.error(f"Errore LibreOffice: {e}")
+            self.logger.error(f"LibreOffice error: {e}")
             return False
