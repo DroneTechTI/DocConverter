@@ -58,16 +58,19 @@ def check_and_install_dependencies() -> bool:
             missing.append(package_name)
     
     if missing:
-        print()
-        print("❌ Missing required dependencies:")
-        print()
-        for pkg in missing:
-            print(f"   • {pkg}")
-        print()
-        print("📋 Install with:")
-        print(f"   pip install {' '.join(missing)}")
-        print()
-        input("Press ENTER to close...")
+        # Show error dialog instead of console
+        try:
+            from PyQt6.QtWidgets import QApplication, QMessageBox
+            app = QApplication(sys.argv)
+            
+            msg = "Missing required dependencies:\n\n"
+            for pkg in missing:
+                msg += f"• {pkg}\n"
+            msg += f"\nInstall with:\npip install {' '.join(missing)}"
+            
+            QMessageBox.critical(None, "Missing Dependencies", msg)
+        except:
+            pass
         return False
     
     return True
