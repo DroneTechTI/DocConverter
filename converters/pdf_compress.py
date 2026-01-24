@@ -1,10 +1,11 @@
 """
-PDF Compress Converter - Comprime PDF riducendo dimensioni
+PDF Compress Converter - Compresses PDF files to reduce size.
 
-Usa pypdf per comprimere PDF
+Uses pypdf library to compress PDF files.
 """
 
 from pathlib import Path
+from typing import Optional, Callable
 
 from core.converter_base import ConverterBase
 from utils.error_handler import ConversionError
@@ -12,98 +13,103 @@ from utils.error_handler import ConversionError
 
 class PDFCompressConverter(ConverterBase):
     """
-    Convertitore per comprimere file PDF riducendo le dimensioni
+    Converter to compress PDF files reducing file size.
     """
     
-    def __init__(self):
-        """Inizializza il convertitore PDF Compress"""
+    def __init__(self) -> None:
+        """Initialize PDF Compress converter."""
         super().__init__()
     
     def get_info(self) -> dict:
-        """Informazioni sul convertitore"""
+        """Return converter metadata."""
         return {
             'name': 'PDF Compress',
-            'description': 'Comprime file PDF riducendo le dimensioni',
+            'description': 'Compresses PDF files reducing file size',
             'input_formats': ['.pdf'],
             'output_format': '.pdf',
             'requires_dep': None
         }
     
-    def convert(self, input_file: Path, output_file: Path, progress_callback=None) -> bool:
+    def convert(
+        self,
+        input_file: Path,
+        output_file: Path,
+        progress_callback: Optional[Callable[[int, str], None]] = None
+    ) -> bool:
         """
-        Comprime un PDF
+        Compress a PDF file.
         
         Args:
-            input_file: File PDF di input
-            output_file: File PDF compresso di output
-            progress_callback: Callback per progress bar
+            input_file: Input PDF file
+            output_file: Compressed PDF output file
+            progress_callback: Optional callback for progress bar
             
         Returns:
-            True se successo
+            True if successful
         """
         try:
             from pypdf import PdfReader, PdfWriter
             
-            self.logger.info(f"Compressione PDF: {input_file}")
-            self._report_progress(progress_callback, 10, "Lettura PDF...")
+            self.logger.info(f"Compressing PDF: {input_file}")
+            self._report_progress(progress_callback, 10, "Reading PDF...")
             
-            # Leggi PDF
+            # Read PDF
             reader = PdfReader(str(input_file))
             writer = PdfWriter()
             
-            self._report_progress(progress_callback, 30, "Compressione pagine...")
+            self._report_progress(progress_callback, 30, "Compressing pages...")
             
-            # Copia pagine con compressione
+            # Copy pages with compression
             total_pages = len(reader.pages)
             for i, page in enumerate(reader.pages):
-                # Comprimi immagini nella pagina
+                # Compress images in page
                 page.compress_content_streams()
                 writer.add_page(page)
                 
-                # Aggiorna progresso
+                # Update progress
                 progress = 30 + int((i / total_pages) * 50)
-                self._report_progress(progress_callback, progress, f"Pagina {i+1}/{total_pages}...")
+                self._report_progress(progress_callback, progress, f"Page {i+1}/{total_pages}...")
             
-            # Rimuovi oggetti duplicati e comprimi
-            self._report_progress(progress_callback, 80, "Ottimizzazione finale...")
+            # Remove duplicate objects and compress
+            self._report_progress(progress_callback, 80, "Final optimization...")
             
-            # Impostazioni di compressione
+            # Compression settings
             writer.add_metadata(reader.metadata)
             
-            self._report_progress(progress_callback, 90, "Salvataggio...")
+            self._report_progress(progress_callback, 90, "Saving...")
             
-            # Scrivi output
+            # Write output
             with open(output_file, 'wb') as f:
                 writer.write(f)
             
-            self._report_progress(progress_callback, 100, "Completato!")
+            self._report_progress(progress_callback, 100, "Completed!")
             
-            # Verifica risultato
+            # Verify result
             if output_file.exists() and output_file.stat().st_size > 0:
                 original_size = input_file.stat().st_size
                 compressed_size = output_file.stat().st_size
                 reduction = ((original_size - compressed_size) / original_size) * 100
                 
                 self.logger.info(
-                    f"✅ PDF compresso: {output_file}\n"
-                    f"   Originale: {original_size / 1024:.1f} KB\n"
-                    f"   Compresso: {compressed_size / 1024:.1f} KB\n"
-                    f"   Riduzione: {reduction:.1f}%"
+                    f"✅ PDF compressed: {output_file}\n"
+                    f"   Original: {original_size / 1024:.1f} KB\n"
+                    f"   Compressed: {compressed_size / 1024:.1f} KB\n"
+                    f"   Reduction: {reduction:.1f}%"
                 )
                 return True
             
             return False
         
         except ImportError as e:
-            self.logger.error(f"Libreria mancante: {e}")
+            self.logger.error(f"Missing library: {e}")
             raise ConversionError(
-                "Libreria pypdf mancante!\n\n"
-                "Installa con: pip install pypdf"
+                "pypdf library missing!\n\n"
+                "Install with: pip install pypdf"
             )
         
         except Exception as e:
-            self.logger.error(f"Errore compressione PDF: {e}")
+            self.logger.error(f"PDF compression error: {e}")
             raise ConversionError(
-                f"Errore compressione PDF: {str(e)}",
+                f"PDF compression error: {str(e)}",
                 file_path=str(input_file)
             )

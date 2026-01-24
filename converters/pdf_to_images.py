@@ -1,9 +1,10 @@
 """
-Convertitore PDF → Immagini
-Supporta formato: .pdf → .png, .jpg
+PDF to Images Converter.
+
+Converts PDF pages to image files (PNG/JPEG).
 """
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from core.converter_base import ConverterBase
 from utils.error_handler import ConversionError
@@ -11,22 +12,22 @@ from utils.error_handler import ConversionError
 
 class PDFToImagesConverter(ConverterBase):
     """
-    Convertitore da PDF a immagini (PNG/JPEG).
+    PDF to images converter (PNG/JPEG).
     
-    Converte ogni pagina del PDF in un'immagine separata.
+    Converts each PDF page to a separate image file.
     """
     
-    def __init__(self):
-        """Inizializza il convertitore PDF → Immagini"""
+    def __init__(self) -> None:
+        """Initialize PDF to Images converter."""
         super().__init__()
     
     def get_info(self) -> dict:
-        """Ritorna informazioni sul convertitore"""
+        """Return converter metadata."""
         return {
             'name': 'PDF to Images',
             'input_formats': ['.pdf'],
             'output_format': '.png',
-            'description': 'Converte pagine PDF in immagini (PNG/JPEG)',
+            'description': 'Converts PDF pages to images (PNG/JPEG)',
             'requires_dependency': None
         }
     
@@ -38,58 +39,58 @@ class PDFToImagesConverter(ConverterBase):
         **kwargs
     ) -> bool:
         """
-        Converte un PDF in immagini.
+        Convert PDF to images.
         
         Args:
-            input_path: Path del file PDF da convertire
-            output_path: Path base per le immagini (es. output.png → output_1.png, output_2.png...)
-            progress_callback: Callback per aggiornamenti progresso
+            input_path: Path to PDF file to convert
+            output_path: Base path for images (e.g., output.png → output_1.png, output_2.png...)
+            progress_callback: Optional callback for progress updates
             **kwargs: 
-                - format: 'png' o 'jpeg' (default: png)
-                - dpi: Risoluzione (default: 200)
+                - format: 'png' or 'jpeg' (default: png)
+                - dpi: Resolution (default: 200)
         
         Returns:
-            True se conversione riuscita
+            True if conversion succeeded
         
         Raises:
-            ConversionError: In caso di errore durante la conversione
+            ConversionError: If conversion fails
         """
-        self.logger.info(f"Inizio conversione PDF→Immagini: {input_path}")
+        self.logger.info(f"Starting PDF→Images conversion: {input_path}")
         
         try:
-            # Validazione input
-            self._report_progress(progress_callback, 5, "Validazione file...")
+            # Validate input
+            self._report_progress(progress_callback, 5, "Validating file...")
             if not self.validate_input(input_path):
                 raise ConversionError(
-                    "File di input non valido",
+                    "Invalid input file",
                     file_path=input_path
                 )
             
-            # Import librerie
-            self._report_progress(progress_callback, 10, "Caricamento librerie...")
+            # Import libraries
+            self._report_progress(progress_callback, 10, "Loading libraries...")
             try:
                 from pdf2image import convert_from_path
             except ImportError:
                 raise ConversionError(
-                    "Libreria pdf2image non installata",
-                    details="Installa con: pip install pdf2image"
+                    "pdf2image library not installed",
+                    details="Install with: pip install pdf2image"
                 )
             
-            # Parametri
+            # Parameters
             output_format = kwargs.get('format', 'png').lower()
             dpi = kwargs.get('dpi', 200)
             
-            # Prepara path
+            # Prepare paths
             input_file = Path(input_path).resolve()
             output_file = Path(output_path).resolve()
             output_dir = output_file.parent
             output_base = output_file.stem
             
-            # Assicura che la directory di output esista
+            # Ensure output directory exists
             output_dir.mkdir(parents=True, exist_ok=True)
             
-            # Conversione
-            self._report_progress(progress_callback, 30, "Conversione pagine...")
+            # Convert
+            self._report_progress(progress_callback, 30, "Converting pages...")
             
             images = convert_from_path(
                 str(input_file),
@@ -99,31 +100,31 @@ class PDFToImagesConverter(ConverterBase):
             
             if not images:
                 raise ConversionError(
-                    "Nessuna pagina trovata nel PDF",
+                    "No pages found in PDF",
                     file_path=input_path
                 )
             
-            # Salva immagini
-            self._report_progress(progress_callback, 60, f"Salvataggio {len(images)} immagini...")
+            # Save images
+            self._report_progress(progress_callback, 60, f"Saving {len(images)} images...")
             
             saved_files = []
             for i, image in enumerate(images, start=1):
                 if len(images) == 1:
-                    # Un'unica pagina: usa nome originale
+                    # Single page: use original name
                     img_path = output_dir / f"{output_base}.{output_format}"
                 else:
-                    # Multiple pagine: aggiungi numero
-                    img_path = output_dir / f"{output_base}_pagina_{i}.{output_format}"
+                    # Multiple pages: add number
+                    img_path = output_dir / f"{output_base}_page_{i}.{output_format}"
                 
                 image.save(str(img_path), output_format.upper())
                 saved_files.append(img_path)
                 
-                # Aggiorna progresso
+                # Update progress
                 progress = 60 + int((i / len(images)) * 30)
-                self._report_progress(progress_callback, progress, f"Pagina {i}/{len(images)}")
+                self._report_progress(progress_callback, progress, f"Page {i}/{len(images)}")
             
-            self._report_progress(progress_callback, 100, "Completato!")
-            self.logger.info(f"Conversione completata: {len(saved_files)} immagini salvate")
+            self._report_progress(progress_callback, 100, "Completed!")
+            self.logger.info(f"Conversion completed: {len(saved_files)} images saved")
             
             return True
         
@@ -131,9 +132,9 @@ class PDFToImagesConverter(ConverterBase):
             raise
         
         except Exception as e:
-            self.logger.error(f"Errore conversione PDF→Immagini: {e}", exc_info=True)
+            self.logger.error(f"PDF→Images conversion error: {e}", exc_info=True)
             raise ConversionError(
-                f"Errore conversione: {str(e)}",
+                f"Conversion error: {str(e)}",
                 file_path=input_path,
                 details=str(e)
             )
