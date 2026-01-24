@@ -1,38 +1,73 @@
 """
-Gestione centralizzata degli errori per DocConverter
+Centralized error handling for DocConverter.
+
+Provides custom exception classes and utilities for consistent error handling
+throughout the application.
 """
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, Any
 from functools import wraps
 import traceback
+import logging
 
 from .logger import get_logger
 
 
 class ConversionError(Exception):
-    """Eccezione personalizzata per errori di conversione"""
+    """
+    Custom exception for document conversion errors.
     
-    def __init__(self, message: str, file_path: str = None, details: str = None):
+    Attributes:
+        message: Error description
+        file_path: Path to file that caused error (if applicable)
+        details: Additional error details
+        
+    Example:
+        >>> raise ConversionError(
+        ...     "Failed to convert document",
+        ...     file_path="document.docx",
+        ...     details="Unsupported format"
+        ... )
+    """
+    
+    def __init__(
+        self,
+        message: str,
+        file_path: Optional[str] = None,
+        details: Optional[str] = None
+    ) -> None:
+        """Initialize conversion error with context."""
         super().__init__(message)
         self.file_path = file_path
         self.details = details
         self.message = message
     
-    def __str__(self):
-        base = f"Errore di conversione: {self.message}"
+    def __str__(self) -> str:
+        """Return formatted error message."""
+        base = f"Conversion error: {self.message}"
         if self.file_path:
             base += f"\nFile: {self.file_path}"
         if self.details:
-            base += f"\nDettagli: {self.details}"
+            base += f"\nDetails: {self.details}"
         return base
 
 
 class DependencyError(Exception):
-    """Eccezione per dipendenze mancanti"""
+    """
+    Exception for missing or unavailable dependencies.
+    
+    Example:
+        >>> raise DependencyError("LibreOffice not found")
+    """
     pass
 
 
 class FileAccessError(Exception):
-    """Eccezione per problemi di accesso ai file"""
+    """
+    Exception for file access problems.
+    
+    Example:
+        >>> raise FileAccessError("Permission denied: document.pdf")
+    """
     pass
 
 

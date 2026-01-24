@@ -1,11 +1,14 @@
 """
-Sistema di logging centralizzato per DocConverter
+Centralized logging system for DocConverter.
+
+Provides unified logging configuration with file rotation, colored console output,
+and easy-to-use logger factory functions.
 """
 import logging
 import sys
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
-from datetime import datetime
+from typing import Optional
 
 try:
     import colorlog
@@ -16,38 +19,50 @@ except ImportError:
 from config.settings import Settings
 
 
-def setup_logger(name: str = None, log_file: Path = None, level: str = None):
+def setup_logger(
+    name: Optional[str] = None,
+    log_file: Optional[Path] = None,
+    level: Optional[str] = None
+) -> logging.Logger:
     """
-    Configura e ritorna un logger con output su console e file
+    Configure and return a logger with console and file output.
+    
+    Sets up a logger with rotating file handler and colored console output
+    (if colorlog is available). Safe to call multiple times - returns existing
+    logger if already configured.
     
     Args:
-        name: Nome del logger (default: root logger)
-        log_file: Path del file di log (default: Settings.LOG_FILE)
-        level: Livello di logging (default: Settings.LOG_LEVEL)
+        name: Logger name (default: app name from Settings)
+        log_file: Log file path (default: Settings.LOG_FILE)
+        level: Logging level (default: Settings.LOG_LEVEL)
     
     Returns:
-        Logger configurato
+        Configured logger instance
+        
+    Example:
+        >>> logger = setup_logger('MyModule', level='DEBUG')
+        >>> logger.info('Application started')
     """
-    # Assicura che la directory dei log esista
+    # Ensure log directory exists
     Settings.ensure_directories()
     
     logger_name = name or Settings.APP_NAME
     logger = logging.getLogger(logger_name)
     
-    # Se il logger è già configurato, ritornalo
+    # If logger already configured, return it
     if logger.handlers:
         return logger
     
     log_level = getattr(logging, (level or Settings.LOG_LEVEL).upper())
     logger.setLevel(log_level)
     
-    # Formato log
+    # File log format
     file_format = logging.Formatter(
         fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     
-    # Handler per file con rotazione
+    # Rotating file handler
     log_file_path = log_file or Settings.LOG_FILE
     file_handler = RotatingFileHandler(
         log_file_path,
@@ -59,7 +74,7 @@ def setup_logger(name: str = None, log_file: Path = None, level: str = None):
     file_handler.setFormatter(file_format)
     logger.addHandler(file_handler)
     
-    # Handler per console con colori (se disponibile)
+    # Console handler with colors (if available)
     if COLORLOG_AVAILABLE:
         console_format = colorlog.ColoredFormatter(
             fmt='%(log_color)s%(levelname)-8s%(reset)s %(message)s',
@@ -79,28 +94,32 @@ def setup_logger(name: str = None, log_file: Path = None, level: str = None):
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
     
-    # Evita propagazione al root logger
+    # Prevent propagation to root logger
     logger.propagate = False
     
-    logger.info(f"{Settings.APP_NAME} v{Settings.APP_VERSION} - Logger inizializzato")
+    logger.info(f"{Settings.APP_NAME} v{Settings.APP_VERSION} - Logger initialized")
     
     return logger
 
 
-def get_logger(name: str = None):
+def get_logger(name: Optional[str] = None) -> logging.Logger:
     """
-    Ottiene un logger esistente o ne crea uno nuovo
+    Get existing logger or create a new one.
     
     Args:
-        name: Nome del logger
+        name: Logger name (default: app name from Settings)
     
     Returns:
-        Logger configurato
+        Configured logger instance
+        
+    Example:
+        >>> logger = get_logger('MyModule')
+        >>> logger.debug('Debug message')
     """
     logger_name = name or Settings.APP_NAME
     logger = logging.getLogger(logger_name)
     
-    # Se non ha handler, configuralo
+    # If no handlers, configure it
     if not logger.handlers:
         return setup_logger(logger_name)
     
@@ -108,11 +127,26 @@ def get_logger(name: str = None):
 
 
 class LoggerMixin:
-    """Mixin per aggiungere logging alle classi"""
+    """
+    Mixin class to add logging capabilities to any class.
+    
+    Provides a lazy-initialized logger property that uses the class name
+    as the logger name.
+    
+    Example:
+        >>> class MyClass(LoggerMixin):
+        ...     def process(self):
+        ...         self.logger.info('Processing started')
+    """
     
     @property
-    def logger(self):
-        """Ritorna il logger per questa classe"""
+    def logger(self) -> logging.Logger:
+        """
+        Get logger for this class.
+        
+        Returns:
+            Logger instance with class name
+        """
         if not hasattr(self, '_logger'):
             self._logger = get_logger(self.__class__.__name__)
         return self._logger
