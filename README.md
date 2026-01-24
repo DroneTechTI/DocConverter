@@ -1,5 +1,13 @@
 # 📄 DocConverter
 
+**Professional Document Conversion Software**
+
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/DevilStyle/DocConverter)
+
+A powerful, cross-platform desktop application for converting documents between multiple formats with a modern graphical interface. Pure Python implementation - no external dependencies required for most conversions!
+
 **Software desktop professionale per la conversione di documenti - Windows & Linux**
 
 ![Version](https://img.shields.io/badge/version-2.5.0-blue)
